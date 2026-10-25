@@ -252,3 +252,7 @@ CI runs both on every push (macOS + Linux).
 ## Credits
 
 Alignment engine ported from the DexWorld Kodi subtitle add-on (`service.subtitles.dexworld`), plus a three-segment different-cut check. Contains no code from GPL projects; NuvioTV Reshaped is only described as an idea in the design notes.
+
+## License
+
+[MIT](LICENSE): free to use, modify and ship in any app, including closed-source and App Store apps. Just keep the copyright notice.
