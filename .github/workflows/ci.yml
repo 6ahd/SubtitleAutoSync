@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  python:
+    name: Python (port + CLI)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffprobe and Lua
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg lua5.4
+      - name: Parity tests
+        run: python -m unittest discover -s python/tests -v
+      - name: CLI smoke test (MP4 via ffprobe)
+        run: |
+          python python/subautosync.py Tests/SubtitleAutoSyncTests/Fixtures/media/movtext.mp4 \
+            Tests/SubtitleAutoSyncTests/Fixtures/media/ref_en.srt --json
+      - name: mpv script syntax
+        run: luac5.4 -p players/mpv/subautosync/main.lua
+
+  swift-macos:
+    name: Swift (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift --version
+      - name: Test
+        run: |
+          python3 Tests/Support/range_server.py Tests/SubtitleAutoSyncTests/Fixtures/media 8765 &
+          sleep 1
+          RANGE_SERVER_URL=http://127.0.0.1:8765 swift test
+
+  swift-linux:
+    name: Swift (Linux)
+    runs-on: ubuntu-latest
+    container: swift:6.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: |
+          apt-get update && apt-get install -y python3
+          python3 Tests/Support/range_server.py Tests/SubtitleAutoSyncTests/Fixtures/media 8765 &
+          sleep 1
+          RANGE_SERVER_URL=http://127.0.0.1:8765 swift test
